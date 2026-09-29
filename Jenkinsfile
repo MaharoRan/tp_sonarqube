@@ -57,6 +57,21 @@ pipeline {
             }
         }
 
+        stage('Wait for API') {
+            steps {
+                sh '''
+                    for attempt in $(seq 1 60); do
+                        if curl --fail --silent "$API_BASE_URL/api/health" > /dev/null; then
+                            exit 0
+                        fi
+                        sleep 2
+                    done
+                    echo "API did not become ready within 120 seconds"
+                    exit 1
+                '''
+            }
+        }
+
         stage('Integration Tests') {
             steps {
                 sh '''
