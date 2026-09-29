@@ -61,15 +61,43 @@ def write_to_postgres(batch_df, batch_id):
         col("timestamp").alias("event_timestamp"),
     )
 
-    output.write \
-        .format("jdbc") \
-        .option("url", f"jdbc:postgresql://{POSTGRES_HOST}:5432/{POSTGRES_DB}") \
-        .option("dbtable", "processed_orders") \
-        .option("user", POSTGRES_USER) \
-        .option("password", POSTGRES_PASSWORD) \
-        .option("driver", "org.postgresql.Driver") \
-        .mode("append") \
-        .save()
+    def insert_partition(rows):
+        import psycopg2
+
+        connection = psycopg2.connect(
+            host=POSTGRES_HOST,
+            dbname=POSTGRES_DB,
+            user=POSTGRES_USER,
+            password=POSTGRES_PASSWORD,
+        )
+        try:
+            with connection.cursor() as cursor:
+                cursor.executemany(
+                    """
+                    INSERT INTO processed_orders (
+                        order_id, customer_id, product_id, quantity,
+                        unit_price, total_amount, event_timestamp
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (order_id) DO NOTHING
+                    """,
+                    [
+                        (
+                            row.order_id,
+                            row.customer_id,
+                            row.product_id,
+                            row.quantity,
+                            row.unit_price,
+                            row.total_amount,
+                            row.event_timestamp,
+                        )
+                        for row in rows
+                    ],
+                )
+            connection.commit()
+        finally:
+            connection.close()
+
+    output.rdd.foreachPartition(insert_partition)
 
 
 query = (

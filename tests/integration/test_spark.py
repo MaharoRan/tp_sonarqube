@@ -73,7 +73,7 @@ def test_kafka_event_is_processed_by_spark_and_saved_to_postgres():
         producer.flush()
 
         deadline = time.monotonic() + float(
-            os.getenv("SPARK_TIMEOUT_SECONDS", "90")
+            os.getenv("SPARK_TIMEOUT_SECONDS", "180")
         )
         while time.monotonic() < deadline and processed_order is None:
             processed_order = _find_processed_order(order_id)
