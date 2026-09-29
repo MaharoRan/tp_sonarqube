@@ -88,7 +88,9 @@ services:
       - data-platform
 
   spark-worker:
-    image: apache/spark:3.5.7
+    build:
+      context: .
+      dockerfile: docker/spark/Dockerfile
     depends_on:
       - spark-master
     command: >

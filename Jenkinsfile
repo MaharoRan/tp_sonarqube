@@ -30,7 +30,9 @@ pipeline {
         stage('Install') {
             steps {
                 sh '''
-                    python3 -m pip install --break-system-packages -r requirements.txt
+                    python3 -m venv .venv
+                    .venv/bin/python -m pip install --upgrade pip
+                    .venv/bin/python -m pip install -r requirements.txt
                 '''
             }
         }
@@ -38,7 +40,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 sh '''
-                                        python3 -m pytest tests/unit \
+                    .venv/bin/python -m pytest tests/unit \
                       --cov=app \
                       --cov-report=xml:coverage.xml \
                       --cov-report=term-missing
@@ -58,7 +60,7 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 sh '''
-                    python3 -m pytest tests/integration
+                    .venv/bin/python -m pytest tests/integration
                 '''
             }
         }
@@ -67,7 +69,7 @@ pipeline {
             steps {
                 sh '''
                     echo "TODO: students must activate the complete E2E scenario."
-                    python3 -m pytest tests/e2e
+                    .venv/bin/python -m pytest tests/e2e
                 '''
             }
         }
