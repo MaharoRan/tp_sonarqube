@@ -76,13 +76,20 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                echo 'TODO: configure SonarQube Scanner / server credentials.'
+                script {
+                    def scannerHome = tool 'sonar-scanner'
+                    withSonarQubeEnv('sonarqube') {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                }
             }
         }
 
         stage('Quality Gate') {
             steps {
-                echo 'TODO: waitForQualityGate() after SonarQube integration.'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
     }
