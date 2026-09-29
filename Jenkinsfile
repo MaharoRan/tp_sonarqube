@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         PYTHON = 'python3'
-        RUN_INTEGRATION_TESTS = 'false'
-        RUN_E2E_TESTS = 'false'
+        RUN_INTEGRATION_TESTS = 'true'
+        RUN_E2E_TESTS = 'true'
     }
 
     stages {
@@ -24,14 +24,16 @@ pipeline {
 
         stage('Install') {
             steps {
-                sh 'python3 -m pip install --user -r requirements.txt'
+                sh '''
+                    python3 -m pip install --break-system-packages -r requirements.txt
+                '''
             }
         }
 
         stage('Unit Tests') {
             steps {
                 sh '''
-                    python3 -m pytest tests/unit \
+                                        python3 -m pytest tests/unit \
                       --cov=app \
                       --cov-report=xml:coverage.xml \
                       --cov-report=term-missing
@@ -78,7 +80,6 @@ pipeline {
 
     post {
         always {
-            junit allowEmptyResults: true, testResults: '**/test-results.xml'
             archiveArtifacts allowEmptyArchive: true, artifacts: 'coverage.xml'
         }
     }
