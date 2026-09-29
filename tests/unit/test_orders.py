@@ -252,8 +252,6 @@ def test_create_order_rejects_unknown_product():
 
 
 def test_create_kafka_producer_configuration(monkeypatch):
-    import sys
-    import types
     from app import main
 
     captured = {}
@@ -262,9 +260,7 @@ def test_create_kafka_producer_configuration(monkeypatch):
         def __init__(self, **kwargs):
             captured.update(kwargs)
 
-    fake_kafka = types.ModuleType("kafka")
-    fake_kafka.KafkaProducer = ConfiguredProducer
-    monkeypatch.setitem(sys.modules, "kafka", fake_kafka)
+    monkeypatch.setattr(main, "KafkaProducer", ConfiguredProducer)
 
     main.create_kafka_producer()
 
