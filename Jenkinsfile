@@ -9,6 +9,7 @@ pipeline {
         KAFKA_BOOTSTRAP_SERVERS = 'kafka:29092'
         KAFKA_TOPIC = 'sales.orders'
         COMPOSE_COMMAND = 'docker-compose'
+        COMPOSE_PROJECT_NAME = 'real-time-sales-devops-tp-dev'
     }
 
     stages {
