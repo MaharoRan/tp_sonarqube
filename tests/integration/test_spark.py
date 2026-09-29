@@ -1,5 +1,6 @@
 import json
 import os
+import shlex
 import subprocess
 import time
 import uuid
@@ -22,8 +23,7 @@ def _find_processed_order(order_id):
     )
     result = subprocess.run(
         [
-            "docker",
-            "compose",
+            *shlex.split(os.getenv("COMPOSE_COMMAND", "docker compose")),
             "exec",
             "-T",
             "postgres",

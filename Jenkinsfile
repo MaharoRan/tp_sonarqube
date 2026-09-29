@@ -5,6 +5,10 @@ pipeline {
         PYTHON = 'python3'
         RUN_INTEGRATION_TESTS = 'true'
         RUN_E2E_TESTS = 'true'
+        API_BASE_URL = 'http://sales-api:8000'
+        KAFKA_BOOTSTRAP_SERVERS = 'kafka:29092'
+        KAFKA_TOPIC = 'sales.orders'
+        COMPOSE_COMMAND = 'docker-compose'
     }
 
     stages {
@@ -41,18 +45,20 @@ pipeline {
             }
         }
 
-        stage('Integration Tests') {
+        stage('Start Platform') {
             steps {
                 sh '''
-                    echo "TODO: enable integration tests after configuring Kafka."
-                    python3 -m pytest tests/integration
+                                        docker-compose up -d --build \
+                      sales-api kafka postgres spark-master spark-worker spark-streaming
                 '''
             }
         }
 
-        stage('Build') {
+        stage('Integration Tests') {
             steps {
-                sh 'docker compose build sales-api spark-streaming'
+                sh '''
+                    python3 -m pytest tests/integration
+                '''
             }
         }
 
